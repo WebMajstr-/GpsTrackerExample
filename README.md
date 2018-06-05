@@ -15,3 +15,10 @@ BUT, I am not able to reproduce on *older shittier* phone:
 Mobistel Cynus E5 (Android 4.4.2)
 
 I would guess that it has something to do with Doze mode on newer devices, but can not find a workaround, although there should be one.
+
+When looking to [issue-example.txt](issue-example.txt), the problem is visible in those two lines:
+```
+10092;2018-06-04T23:00:31.88Z;onGpsStatusChanged;2
+10093;2018-06-04T23:53:26.02Z;onGpsStatusChanged;1
+```
+The `2` and `1` in the end of the lines are `GpsStatus.GPS_EVENT_STOPPED` and `GpsStatus.GPS_EVENT_STARTED`, respectively. It's between those two lines that phone goes to sleep.
