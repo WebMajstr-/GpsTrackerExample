@@ -5,26 +5,22 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-import android.widget.Toast;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.PrintWriter;
-import java.util.Date;
-import java.util.List;
 
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import io.objectbox.Box;
 import pub.devrel.easypermissions.EasyPermissions;
 
 public class MainActivity extends AppCompatActivity {
+
+    private LogService logService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+
+        logService = new LogService(this);
 
         String[] perms = {Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.ACCESS_FINE_LOCATION};
         if (!EasyPermissions.hasPermissions(this, perms)) {
@@ -46,41 +42,12 @@ public class MainActivity extends AppCompatActivity {
 
     @OnClick(R.id.saveLog)
     public void saveLog(View view) {
-
-        Box<LogEntity> logBox = ((App) getApplication()).getBoxStore().boxFor(LogEntity.class);
-        List<LogEntity> logs = logBox.getAll();
-
-        saveToFile(logs);
+        logService.exportToFile();
     }
 
     @OnClick(R.id.emptyLog)
     public void emptyLog(View view) {
-        Box<LogEntity> logBox = ((App) getApplication()).getBoxStore().boxFor(LogEntity.class);
-        logBox.removeAll();
-        Toast.makeText(this, "Log emptied", Toast.LENGTH_LONG).show();
+        logService.clear();
     }
 
-    private void saveToFile(List<LogEntity> logs) {
-        File root = android.os.Environment.getExternalStorageDirectory();
-
-        Date date = new Date();
-
-        File dir = new File(root.getAbsolutePath() + "/gpsTracker");
-        dir.mkdirs();
-        File file = new File(dir, "tracker-" + String.valueOf(System.currentTimeMillis() / 1000L) + ".log");
-
-        try {
-            FileOutputStream f = new FileOutputStream(file);
-            PrintWriter pw = new PrintWriter(f);
-            for (LogEntity logEntity : logs) {
-                pw.println(logEntity.toString());
-            }
-            pw.flush();
-            pw.close();
-            f.close();
-            Toast.makeText(this, "Log successfully saved to " + file.toString(), Toast.LENGTH_LONG).show();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 }

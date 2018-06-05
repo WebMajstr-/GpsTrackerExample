@@ -23,7 +23,6 @@ public class ForegroundService extends Service {
 
     private static final String MAIN_CHANNEL_ID = "main_channel";
 
-
     private LocationManager locationManager;
     private LocationListener locationListener;
     private GpsStatus.Listener listener;
@@ -42,8 +41,10 @@ public class ForegroundService extends Service {
     public void onCreate() {
         super.onCreate();
 
+        // Set service to foreground
         showForegroundNotification();
 
+        // Get logger
         logBox = ((App) getApplication()).getBoxStore().boxFor(LogEntity.class);
         log("Service started");
 
@@ -61,10 +62,7 @@ public class ForegroundService extends Service {
             NotificationChannel mChannel = new NotificationChannel(MAIN_CHANNEL_ID, "Channel Name", importance);
             mChannel.setDescription("Channel description");
             mChannel.setShowBadge(false);
-            // Register the channel with the system; you can't change the importance
-            // or other notification behaviors after this
-            NotificationManager notificationManager = (NotificationManager) getSystemService(
-                    NOTIFICATION_SERVICE);
+            NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
             notificationManager.createNotificationChannel(mChannel);
         }
 
@@ -90,7 +88,6 @@ public class ForegroundService extends Service {
     @SuppressLint("MissingPermission")
     private void getGPSStatus() {
 
-        // Define a listener that responds to location updates
         listener = new GpsStatus.Listener() {
             public void onGpsStatusChanged(int event) {
                 if (event == GpsStatus.GPS_EVENT_SATELLITE_STATUS) {
@@ -106,7 +103,7 @@ public class ForegroundService extends Service {
                             used++;
                     }
 
-                    log("Satelites;" + String.valueOf(used) + "/" + String.valueOf(all));
+                    log("onGpsStatusChangedStatus;" + String.valueOf(used) + "/" + String.valueOf(all));
                 } else {
                     log("onGpsStatusChanged;" + String.valueOf(event));
                 }
@@ -119,7 +116,6 @@ public class ForegroundService extends Service {
     @SuppressLint("MissingPermission")
     private void registerLocationUpdates() {
 
-        // Define a listener that responds to location updates
         locationListener = new LocationListener() {
             public void onLocationChanged(Location location) {
                 log("onLocationChanged;" + location.toString());
@@ -127,15 +123,13 @@ public class ForegroundService extends Service {
 
             public void onStatusChanged(String provider, int status,
                                         Bundle extras) {
-                log("onStatusChanged;" + String.valueOf(status) + ";" + bundle2string(extras));
+                log("onStatusChanged;" + String.valueOf(status));
             }
 
             public void onProviderEnabled(String provider) {
-                log("onProviderEnabled;" + provider);
             }
 
             public void onProviderDisabled(String provider) {
-                log("onProviderDisabled;" + provider);
             }
         };
 
@@ -156,19 +150,8 @@ public class ForegroundService extends Service {
         super.onDestroy();
     }
 
+    // Method that logs all events, so we can analyse it later
     private void log(String log) {
         logBox.put(new LogEntity(log));
-    }
-
-    public static String bundle2string(Bundle bundle) {
-        if (bundle == null) {
-            return null;
-        }
-        String string = "Bundle{";
-        for (String key : bundle.keySet()) {
-            string += " " + key + " => " + bundle.get(key) + ";";
-        }
-        string += " }Bundle";
-        return string;
     }
 }
